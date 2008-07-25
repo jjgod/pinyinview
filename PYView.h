@@ -15,6 +15,12 @@
 // The advance space ratio for hanzi
 #define kFontAdvanceRatio    1.1
 
+// The initial capacity of PYMarkerItem array
+#define kMarkerItemsInitialCapacity 10
+
+// The space between each marker item
+#define kMarkerItemInterspacing 20
+
 @interface PYMarkerItem : NSObject
 {
     NSString *_han;
@@ -30,19 +36,25 @@
               pinyin: (NSArray *) pinyin
                 type: (int) type;
 
++ (id) itemWithHanzi: (NSString *) hanzi
+              pinyin: (NSArray *) pinyin
+                type: (int) type;
+
 @end
 
 @interface PYView : NSView
 {
-    PYMarkerItem *_item;
-    NSDictionary *_hanAttributes;
-    NSDictionary *_pyAttributes;
-    float         _size;
-    float         _pinyinSize;
-    float         _advance;
+    NSMutableArray *_items;
+    NSDictionary   *_hanAttributes;
+    NSDictionary   *_pyAttributes;
+    float           _size;
+    float           _pinyinSize;
+    float           _advance;
 }
 
-- (void) setMarkerItem: (PYMarkerItem *) item;
+- (void) appendMarkerItem: (PYMarkerItem *) item;
+- (void) clearMarkerItems;
+
 - (id) initWithFrame: (NSRect) frameRect
             fontName: (NSString *) name
                color: (NSColor *) color;

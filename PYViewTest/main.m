@@ -104,13 +104,18 @@ int main(int argc, char *argv[])
     view = [[PYView alloc] initWithFrame: viewRect
                                 fontName: @"FZKai-Z03"
                                    color: [NSColor whiteColor]];
-    NSArray *pinyin = [NSArray arrayWithObjects: @"nǐ", @"hǎo", @"zhōng", @"huá", 
-                       @"rén", @"mín", @"gòng", @"hé", @"guó", nil];
-    PYMarkerItem *item = [[PYMarkerItem alloc] initWithHanzi: @"你好中华人民共和国"
-                                                      pinyin: pinyin
-                                                        type: 1];
-    [view setMarkerItem: item];
-    [item release];
+
+    NSArray *pinyin1 = [NSArray arrayWithObjects: @"nǐ", @"hǎo", nil];
+    NSArray *pinyin2 = [NSArray arrayWithObjects: @"zhōng", @"huá",
+                        @"rén", @"mín", @"gòng", @"hé", @"guó", nil];
+
+
+    [view appendMarkerItem: [PYMarkerItem itemWithHanzi: @"你好"
+                                                 pinyin: pinyin1
+                                                   type: 1]];
+    [view appendMarkerItem: [PYMarkerItem itemWithHanzi: @"中华人民共和国"
+                                                 pinyin: pinyin2
+                                                   type: 1]];
 
     [[window contentView] addSubview: view];
     [window makeFirstResponder: view];    

@@ -5,6 +5,15 @@
 
 @implementation PYMarkerItem
 
++ (id) itemWithHanzi: (NSString *) hanzi
+              pinyin: (NSArray *) pinyin
+                type: (int) type
+{
+    return [[[PYMarkerItem alloc] initWithHanzi: hanzi
+                                         pinyin: pinyin
+                                           type: type] autorelease];
+}
+
 - (id) initWithHanzi: (NSString *) hanzi
               pinyin: (NSArray *) pinyin
                 type: (int) type
@@ -15,7 +24,7 @@
     {
         _han = [hanzi retain];
         _py  = [pinyin retain];
-        type = type;
+        _type = type;
     }
 
     return self;
@@ -60,8 +69,6 @@
                       kPinyinHanziLeading) / (1 + kPinyinFontSizeRatio);
         _advance = size * kFontAdvanceRatio;
 
-        NSLog(@"size = %g", size);
-
         NSDictionary *fontAttributes = 
             [NSDictionary dictionaryWithObjectsAndKeys: 
                 name, NSFontNameAttribute, 
@@ -90,9 +97,44 @@
         _size = size;
         // Relax for a few more pixels
         _pinyinSize = kPinyinFontSizeRatio * size + 3;
+
+        _items = [[NSMutableArray alloc] initWithCapacity: kMarkerItemsInitialCapacity];
     }
-    
+
     return self;
+}
+
+- (float) drawItem: (PYMarkerItem *) item
+           atPoint: (NSPoint) point
+{
+    NSString *hanzi = [item hanzi];
+
+    [hanzi drawAtPoint: point
+        withAttributes: _hanAttributes];
+
+    NSArray *pinyin = [item pinyin];
+
+    float x = point.x;
+    float y = point.y + _size + kPinyinHanziLeading;
+
+    if (pinyin)
+    {
+        NSEnumerator *enumerator = [pinyin objectEnumerator];
+        NSString *py;
+
+        while (py = [enumerator nextObject])
+        {
+            // Center the pinyin
+            float shift = (_advance - [py sizeWithAttributes: _pyAttributes].width) / 2;
+
+            [py drawAtPoint: NSMakePoint(x + shift, y)
+             withAttributes: _pyAttributes];
+
+            x += _advance;
+        }
+    }
+
+    return x;
 }
 
 - (void) drawRect: (NSRect) rect
@@ -100,46 +142,30 @@
     [[NSColor blackColor] set];
     NSRectFill(rect);
 
-    if (_item && [_item hanzi])
-    {
-        NSString *hanzi = [_item hanzi];
+    NSEnumerator *enumerator = [_items objectEnumerator];
+    PYMarkerItem *item;
 
-        [hanzi drawAtPoint: NSMakePoint(kPinyinViewBorder, kPinyinViewBorder) 
-            withAttributes: _hanAttributes];
+    NSPoint p = NSMakePoint(kPinyinViewBorder,
+                            kPinyinViewBorder);
 
-        NSArray *pinyin = [_item pinyin];
-
-        if (pinyin)
-        {
-            NSEnumerator *enumerator = [pinyin objectEnumerator];
-            NSString *py;
-
-            float y = kPinyinViewBorder + _size + kPinyinHanziLeading;
-            float x = kPinyinViewBorder;
-
-            while (py = [enumerator nextObject])
-            {
-                // Center the pinyin
-                float shift = (_advance - [py sizeWithAttributes: _pyAttributes].width) / 2;
-
-                [py drawAtPoint: NSMakePoint(x + shift, y)
-                 withAttributes: _pyAttributes];
-
-                x += _advance;
-            }
-        }
-    }
+    while (item = [enumerator nextObject])
+        if ([item type] == 1)
+            p.x = [self drawItem: item atPoint: p] + kMarkerItemInterspacing;
 }
 
-- (void) setMarkerItem: (PYMarkerItem *) item
+- (void) appendMarkerItem: (PYMarkerItem *) item
 {
-    [_item release];
-    _item = [item retain];
+    [_items addObject: item];
+}
+
+- (void) clearMarkerItems
+{
+    [_items removeAllObjects];
 }
 
 - (void) dealloc
 {
-    [_item release];
+    [_items release];
     [_hanAttributes release];
     [_pyAttributes release];
     
