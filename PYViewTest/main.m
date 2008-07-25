@@ -100,13 +100,13 @@ int main(int argc, char *argv[])
     
     create_menus("PYViewTest");
     
-    NSRect viewRect = NSMakeRect(50, 250, 700, 100);
+    NSRect viewRect = NSMakeRect(50, 250, 700, 80);
     view = [[PYView alloc] initWithFrame: viewRect
-                                fontName: @"STXihei"
-                                    size: 36.0
+                                fontName: @"FZKai-Z03"
                                    color: [NSColor whiteColor]];
-    NSArray *pinyin = [NSArray arrayWithObjects: @"nǐ", @"hǎo", nil];
-    PYMarkerItem *item = [[PYMarkerItem alloc] initWithHanzi: @"你好"
+    NSArray *pinyin = [NSArray arrayWithObjects: @"nǐ", @"hǎo", @"zhōng", @"huá", 
+                       @"rén", @"mín", @"gòng", @"hé", @"guó", nil];
+    PYMarkerItem *item = [[PYMarkerItem alloc] initWithHanzi: @"你好中华人民共和国"
                                                       pinyin: pinyin
                                                         type: 1];
     [view setMarkerItem: item];

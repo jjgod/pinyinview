@@ -2,7 +2,18 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define kPinyinFontSize 20.0
+// The resulting font size for pinyin text is
+// font size for hanzi * kPinyinFontSizeRatio
+#define kPinyinFontSizeRatio 0.35
+
+// Border length in user space unit
+#define kPinyinViewBorder    10
+
+// The height between pinyin and hanzi
+#define kPinyinHanziLeading  10
+
+// The advance space ratio for hanzi
+#define kFontAdvanceRatio    1.1
 
 @interface PYMarkerItem : NSObject
 {
@@ -27,12 +38,13 @@
     NSDictionary *_hanAttributes;
     NSDictionary *_pyAttributes;
     float         _size;
+    float         _pinyinSize;
+    float         _advance;
 }
 
 - (void) setMarkerItem: (PYMarkerItem *) item;
 - (id) initWithFrame: (NSRect) frameRect
             fontName: (NSString *) name
-                size: (float) size
-                color: (NSColor *) color;
+               color: (NSColor *) color;
 
 @end

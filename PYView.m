@@ -50,17 +50,22 @@
 
 - (id) initWithFrame: (NSRect) frameRect
             fontName: (NSString *) name
-                size: (float) size
                color: (NSColor *) color
 {
     self = [super initWithFrame: frameRect];
 
     if (self)
     {
+        float size = (frameRect.size.height - kPinyinViewBorder * 2 - 
+                      kPinyinHanziLeading) / (1 + kPinyinFontSizeRatio);
+        _advance = size * kFontAdvanceRatio;
+
+        NSLog(@"size = %g", size);
+
         NSDictionary *fontAttributes = 
             [NSDictionary dictionaryWithObjectsAndKeys: 
                 name, NSFontNameAttribute, 
-                [NSNumber numberWithFloat: size], NSFontFixedAdvanceAttribute, 
+                [NSNumber numberWithFloat: _advance], NSFontFixedAdvanceAttribute, 
                 nil];
     
         NSFontDescriptor *descriptor = 
@@ -79,10 +84,12 @@
             color, NSForegroundColorAttributeName, nil];
         
         _pyAttributes = [[NSDictionary alloc] initWithObjectsAndKeys: 
-            [NSFont fontWithName: @"Lucida Grande" size: kPinyinFontSize], NSFontAttributeName, 
+            [NSFont fontWithName: @"Helvetica Neue Light" size: kPinyinFontSizeRatio * size], NSFontAttributeName, 
             color, NSForegroundColorAttributeName, nil];
-    
+
         _size = size;
+        // Relax for a few more pixels
+        _pinyinSize = kPinyinFontSizeRatio * size + 3;
     }
     
     return self;
@@ -97,7 +104,7 @@
     {
         NSString *hanzi = [_item hanzi];
 
-        [hanzi drawAtPoint: NSMakePoint(10, 10) 
+        [hanzi drawAtPoint: NSMakePoint(kPinyinViewBorder, kPinyinViewBorder) 
             withAttributes: _hanAttributes];
 
         NSArray *pinyin = [_item pinyin];
@@ -106,18 +113,19 @@
         {
             NSEnumerator *enumerator = [pinyin objectEnumerator];
             NSString *py;
-            float y = 10 + _size + 10;
-            float x = 10;
+
+            float y = kPinyinViewBorder + _size + kPinyinHanziLeading;
+            float x = kPinyinViewBorder;
 
             while (py = [enumerator nextObject])
             {
-                float shift = (_size - [py sizeWithAttributes: _pyAttributes].width) / 2;
-                NSRect rect = NSMakeRect(x + shift, y, _size, kPinyinFontSize);
+                // Center the pinyin
+                float shift = (_advance - [py sizeWithAttributes: _pyAttributes].width) / 2;
 
-                [py drawInRect: rect
-                withAttributes: _pyAttributes];
+                [py drawAtPoint: NSMakePoint(x + shift, y)
+                 withAttributes: _pyAttributes];
 
-                x += _size;
+                x += _advance;
             }
         }
     }
